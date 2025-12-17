@@ -1,0 +1,9 @@
+# Minimal recommended requirements. Installing TensorFlow can be large; if you only want the sklearn
+# fallback, install scikit-learn and joblib only.
+numpy
+matplotlib
+scikit-learn
+joblib
+# If you want the TensorFlow trainer, install one of these (choose one):
+# tensorflow             # latest (may include GPU support)
+# tensorflow-cpu         # CPU-only build
