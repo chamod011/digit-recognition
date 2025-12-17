@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Digit Draw & Predict</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; }
+    #canvas { border: 1px solid #333; touch-action: none; }
+    .controls { margin-top: 8px; }
+    button { margin-right: 8px; }
+    #result { margin-top: 12px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h2>Draw a digit and click Predict</h2>
+  <canvas id="canvas" width="280" height="280"></canvas>
+  <div class="controls">
+    <button id="clearBtn">Clear</button>
+    <button id="predictBtn">Predict</button>
+    <label><input type="checkbox" id="invert"> Invert (white background)</label>
+  </div>
+  <div id="result">Model response will appear here.</div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 18;
+    ctx.lineCap = 'round';
+
+    let drawing = false;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      return {x, y};
+    }
+
+    canvas.addEventListener('pointerdown', (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('pointermove', (e) => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+    canvas.addEventListener('pointerup', () => { drawing = false; });
+    canvas.addEventListener('pointerleave', () => { drawing = false; });
+
+    document.getElementById('clearBtn').onclick = () => { ctx.fillStyle='black'; ctx.fillRect(0,0,canvas.width,canvas.height); };
+
+    async function predict() {
+      const invert = document.getElementById('invert').checked;
+      const dataUrl = canvas.toDataURL('image/png');
+      // send to server
+      try {
+        const res = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl, invert: invert })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('result').innerText = `Predicted: ${data.label} (model: ${data.model_type})`;
+        } else {
+          document.getElementById('result').innerText = 'Error: ' + (data.error || JSON.stringify(data));
+        }
+      } catch (err) {
+        document.getElementById('result').innerText = 'Request failed: ' + err;
+      }
+    }
+
+    document.getElementById('predictBtn').onclick = predict;
+  </script>
+</body>
+</html>

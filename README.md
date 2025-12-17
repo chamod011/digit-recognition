@@ -72,9 +72,39 @@ Next steps / suggestions
 - Add a small set of example test images in a `samples/` folder to make quick verification easier.
 - If you want, I can create a sample `test_digit.png` and run the notebook here to show a prediction.
 
+Web drawing UI (draw on canvas and predict)
+
+This repository also includes a simple HTML canvas client (`web_app.html`) and a small Flask server (`app.py`) so you can draw digits in your browser and get live predictions from your model.
+
+1. Start the Flask server from the repository root (ensure your venv is activated and dependencies installed):
+
+```powershell
+python app.py --model mnist_cnn.h5 --port 5000
+```
+
+If your model is named differently, replace `mnist_cnn.h5` with your model path (supports `.h5` Keras models and `.joblib` scikit-learn models).
+
+2. Open the client in your browser:
+
+- Visit `http://localhost:5000/web_app.html` to open the drawing canvas. Draw with mouse or touch, then click **Predict**.
+- Use the **Invert** checkbox if your canvas output has reversed colors (white digit on black vs black digit on white).
+
+How it works
+- The client captures the canvas as a PNG and POSTs it to `/predict` on the server.
+- The server decodes the PNG, preprocesses into the correct shape (28x28 for Keras MNIST models, 8x8 for the sklearn digits model), and returns a JSON response `{ label, probs, model_type }`.
+
+Troubleshooting for the web UI
+- If you get `Model file not found`, double-check the `--model` path you passed to `app.py` and that the server is running in the same folder as the model.
+- If predictions are consistently wrong, try the **Invert** checkbox and draw a larger, centered digit.
+- If the server returns an error about TensorFlow imports but you only intend to use sklearn, train and supply a `.joblib` model instead.
+
+Next actions I can do for you
+- Add automatic centering and normalization in the server to better match MNIST preprocessing.
+- Add a `samples/` folder with a few example images and a test script.
+- Create a small Dockerfile to run the server consistently.
+
 License
 
 This repository is provided as a simple example — add a license file if you plan to share or publish broadly.
 
 If you want any part of this README expanded (more troubleshooting, examples, or CI instructions), tell me which sections to expand.
-# digit-recognition
