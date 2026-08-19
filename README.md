@@ -106,5 +106,3 @@ Next actions I can do for you
 License
 
 This repository is provided as a simple example — add a license file if you plan to share or publish broadly.
-
-If you want any part of this README expanded (more troubleshooting, examples, or CI instructions), tell me which sections to expand.
